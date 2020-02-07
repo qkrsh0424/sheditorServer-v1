@@ -1,22 +1,24 @@
 const express = require('express');
 const router = express();
 const connect = require('../../database/database');
+const pool = require('../../database/databasePool');
 const cipher = require('../../handler/security');
 
 var redis = require('redis'),
     client = redis.createClient();
 
 const draftjsHandle = require('../../handler/draftjsHandle');
+const sheditorHandle = require('../../handler/sheditorHandle');
 
 const corsCheck = require('../../config/corsCheck');
 
 router.use(function (req, res, next) { //1
     // if(req.headers.authorization){
-        if(corsCheck.checkAuth(req.headers.authorization)){
-            next();
-        }else{
-            res.send(`<h1>not Found Page</h1>`);
-        }
+    if (corsCheck.checkAuth(req.headers.authorization)) {
+        next();
+    } else {
+        res.send(`<h1>not Found Page</h1>`);
+    }
     // }
 });
 
@@ -33,14 +35,15 @@ router.get('/getpost/all', function (req, res) {
         ORDER BY post_created DESC
         LIMIT ?
     `;
-    
+
     let params = [getLimit];
     connect.query(sql, params, function (err, rows, fields) {
         let result = [];
-        if(rows[0]){
-            for(let i = 0; i< rows.length; i++){
+        if (rows[0]) {
+            for (let i = 0; i < rows.length; i++) {
                 let data = {
-                    post_id:rows[i].post_id,
+                    post_id: rows[i].post_id,
+                    editorType:rows[i].editorType,
                     shb_num: rows[i].shb_num,
                     shb_name: rows[i].shb_name,
                     shb_item_id: rows[i].shb_item_id,
@@ -61,11 +64,11 @@ router.get('/getpost/all', function (req, res) {
                 }
                 result.push(data);
             }
-            res.json({message:'success',data:result});
-        }else{
-            res.json({message:'none'});
+            res.json({ message: 'success', data: result });
+        } else {
+            res.json({ message: 'none' });
         }
-        
+
     });
 });
 
@@ -84,6 +87,7 @@ router.get('/getpost/one', function (req, res) {
                 result.push({
                     message: 'success',
                     post_id: rowsPost[0].post_id,
+                    editorType: rowsPost[0].editorType,
                     shb_num: rowsPost[0].shb_num,
                     shb_item_id: rowsPost[0].shb_item_id,
                     parent_route: rowsPost[0].parent_route,
@@ -104,10 +108,10 @@ router.get('/getpost/one', function (req, res) {
                 });
                 return res.json(result);
             }
-            
+
             const sessID = 'sess:' + cipher.decrypt(req.query.usid);
             client.exists(sessID, (err, replyExists) => {
-                
+
                 if (replyExists) {
                     client.get(sessID, (err, replyGet) => {
                         const resultGet = JSON.parse(replyGet);
@@ -126,6 +130,7 @@ router.get('/getpost/one', function (req, res) {
                                     result.push({
                                         message: 'success',
                                         post_id: rowsPost[0].post_id,
+                                        editorType: rowsPost[0].editorType,
                                         shb_num: rowsPost[0].shb_num,
                                         shb_item_id: rowsPost[0].shb_item_id,
                                         parent_route: rowsPost[0].parent_route,
@@ -139,7 +144,7 @@ router.get('/getpost/one', function (req, res) {
                                         user_nickname: rowsPost[0].user_nickname,
                                         post_isSecret: rowsPost[0].post_isSecret,
                                         post_user_isSecret: rowsPost[0].post_user_isSecret,
-                                        post_materials:JSON.parse(rowsPost[0].post_materials),
+                                        post_materials: JSON.parse(rowsPost[0].post_materials),
                                         post_created: rowsPost[0].post_created,
                                         post_updated: rowsPost[0].post_updated,
                                         like: 'on',
@@ -148,6 +153,7 @@ router.get('/getpost/one', function (req, res) {
                                     result.push({
                                         message: 'success',
                                         post_id: rowsPost[0].post_id,
+                                        editorType: rowsPost[0].editorType,
                                         shb_num: rowsPost[0].shb_num,
                                         shb_item_id: rowsPost[0].shb_item_id,
                                         parent_route: rowsPost[0].parent_route,
@@ -161,7 +167,7 @@ router.get('/getpost/one', function (req, res) {
                                         user_nickname: rowsPost[0].user_nickname,
                                         post_isSecret: rowsPost[0].post_isSecret,
                                         post_user_isSecret: rowsPost[0].post_user_isSecret,
-                                        post_materials:JSON.parse(rowsPost[0].post_materials),
+                                        post_materials: JSON.parse(rowsPost[0].post_materials),
                                         post_created: rowsPost[0].post_created,
                                         post_updated: rowsPost[0].post_updated,
                                         like: 'off',
@@ -175,14 +181,14 @@ router.get('/getpost/one', function (req, res) {
                 }
             });
             // res.json({message:'success',data:rowsPost})
-        }else{
-            res.json([{message:'error'}]);
+        } else {
+            res.json([{ message: 'error' }]);
         }
     });
 })
 
-router.get('/getpost/shbNum/all',function(req,res){
-    if(!req.query.hasBoundary){
+router.get('/getpost/shbNum/all', function (req, res) {
+    if (!req.query.hasBoundary) {
         let sql = `
             SELECT post.*, user.user_nickname, shb_item.shb_item_name
             FROM post
@@ -193,7 +199,7 @@ router.get('/getpost/shbNum/all',function(req,res){
         `;
         let params = [req.query.shb_num];
 
-        connect.query(sql, params, function(err, rows, fields){
+        connect.query(sql, params, function (err, rows, fields) {
             let result = [];
             for (let i = 0; i < rows.length; i++) {
                 if (rows[i]) {
@@ -221,7 +227,7 @@ router.get('/getpost/shbNum/all',function(req,res){
             }
             return res.json(result);
         });
-    }else{
+    } else {
         let sql = `
             SELECT post.*, user.user_nickname, shb_item.shb_item_name
             FROM post
@@ -232,7 +238,7 @@ router.get('/getpost/shbNum/all',function(req,res){
         `;
         let params = [req.query.shb_num];
 
-        connect.query(sql, params, function(err, rows, fields){
+        connect.query(sql, params, function (err, rows, fields) {
             let result = [];
             for (let i = req.query.startPostIndex; i < req.query.currentPostIndex; i++) {
                 if (rows[i]) {
@@ -261,7 +267,7 @@ router.get('/getpost/shbNum/all',function(req,res){
             return res.json(result);
         });
     }
-    
+
 })
 
 router.get('/getpost/category/all', function (req, res) {
@@ -284,6 +290,8 @@ router.get('/getpost/category/all', function (req, res) {
                 if (rows[i]) {
                     result.push({
                         post_id: rows[i].post_id,
+                        editorType: rows[i].editorType,
+                        post_textOnly: rows[i].post_textOnly,
                         shb_num: rows[i].shb_num,
                         shb_item_id: rows[i].shb_item_id,
                         parent_route: rows[i].parent_route,
@@ -328,6 +336,8 @@ router.get('/getpost/category/all', function (req, res) {
                                 }
                                 result.push({
                                     post_id: rows[i].post_id,
+                                    editorType: rows[i].editorType,
+                                    post_textOnly: rows[i].post_textOnly,
                                     shb_num: rows[i].shb_num,
                                     shb_item_id: rows[i].shb_item_id,
                                     parent_route: rows[i].parent_route,
@@ -373,7 +383,7 @@ router.post('/writepost/category', function (req, res) {
                 let post_image_count = draftjsHandle.getImageCount(req.body.post_desc); // 이미지 개수 계산
                 let post_thumbnail_url = draftjsHandle.getThumbnailUrl(req.body.post_desc); // 포스터의 첫번째 사진을 썸네일로 한다.
                 let post_materials = null;
-                if(req.body.post_materials[0]){
+                if (req.body.post_materials[0]) {
                     post_materials = JSON.stringify(req.body.post_materials);
                 }
                 // var sql = `INSERT INTO post(shb_num, shb_item_id, parent_route, post_title, post_desc, post_thumbnail_url, post_image_count, user_id)
@@ -412,6 +422,400 @@ router.post('/writepost/category', function (req, res) {
     });
 });
 
+// path: /api/shb/post/getpost/sheditor/one
+router.get('/getpost/sheditor/one', async function(req,res){
+
+    let sql = `
+        SELECT post.*, user.user_nickname, shb.shb_name, shb_item.shb_item_name FROM post
+        JOIN shb ON shb.shb_num = post.shb_num
+        JOIN user ON post.user_id=user.user_id
+        JOIN shb_item ON post.shb_item_id=shb_item.shb_item_id
+        WHERE post.post_id=? AND post.post_isDeleted=0 AND shb_item.shb_item_visible=1
+    `;
+    let params = [req.query.PostVal];
+    connect.query(sql, params, async function(err, rows){
+        if(err){
+            return res.json({message:'error'});
+        }
+
+        let metaData = JSON.parse(rows[0].post_desc);
+        let postModule = [];
+        for(let i = 0; i<metaData.length;i++){
+            let sql = `
+                SELECT * FROM post_block WHERE pblock_id=?
+            `;
+            let params=[metaData[i]];
+            let [getBlk,fields] = await pool.query(sql, params);
+            let setModule = {
+                id:getBlk[0].pblock_uuid,
+                imageList:JSON.parse(getBlk[0].pblock_images),
+                editorData:getBlk[0].pblock_desc,
+                imageSliderOn:Boolean(getBlk[0].pblock_imageSliderOn)
+            }
+            postModule.push(setModule);
+        }
+
+        
+        if (req.query.usid === undefined) {
+            // console.log('user undefined');
+            let postMetaData=[];
+            postMetaData.push({
+                post_id: rows[0].post_id,
+                editorType: rows[0].editorType,
+                post_textOnly: rows[0].post_textOnly,
+                shb_num: rows[0].shb_num,
+                shb_name:rows[0].shb_name,
+                shb_item_id: rows[0].shb_item_id,
+                shb_item_name:rows[0].shb_item_name,
+                parent_route: rows[0].parent_route,
+                post_title: rows[0].post_title,
+                post_desc: rows[0].post_desc,
+                post_thumbnail_url: rows[0].post_thumbnail_url,
+                post_like_count: rows[0].post_like_count,
+                post_comment_count: rows[0].post_comment_count,
+                post_view_count: rows[0].post_view_count,
+                post_image_count: rows[0].post_image_count,
+                user_nickname: rows[0].user_nickname,
+                post_isSecret: rows[0].post_isSecret,
+                post_user_isSecret: rows[0].post_user_isSecret,
+                post_created: rows[0].post_created,
+                post_updated: rows[0].post_updated,
+                liked: 'off'
+            });
+            return res.json({
+                message:'success', 
+                postModule:postModule, 
+                commonFiles:rows[0].post_materials,
+                postMetaData:postMetaData[0]
+            });
+        }
+        // console.log('user defined');
+        const sessID = 'sess:' + cipher.decrypt(req.query.usid);
+            client.exists(sessID, (err, replyExists) => {
+
+                if (replyExists) {
+                    client.get(sessID, (err, replyGet) => {
+                        const resultGet = JSON.parse(replyGet);
+                        const user_id = resultGet.user.user_id;
+                        let postOwner = false;
+                        let sql = `
+                                SELECT * FROM post_like WHERE user_id=? AND post_id=? AND post_like_head_type=?
+                            `;
+                        let params = [user_id, req.query.PostVal, rows[0].shb_num];
+                        // console.log(rows[0].user_id);
+                        // console.log(user_id);
+
+                        if(rows[0].user_id===user_id){
+                            postOwner = true;
+                        }
+
+                        connect.query(sql, params, function (err, resultrows, fields) {
+                            if (err) {
+                                res.status(500).json({ message: 'error' });
+                            } else {
+                                let postMetaData = [];
+                                if (resultrows[0]) {
+
+                                    postMetaData.push({
+                                        post_id: rows[0].post_id,
+                                        editorType: rows[0].editorType,
+                                        post_textOnly: rows[0].post_textOnly,
+                                        shb_num: rows[0].shb_num,
+                                        shb_name:rows[0].shb_name,
+                                        shb_item_id: rows[0].shb_item_id,
+                                        shb_item_name:rows[0].shb_item_name,
+                                        parent_route: rows[0].parent_route,
+                                        post_title: rows[0].post_title,
+                                        post_desc: rows[0].post_desc,
+                                        post_thumbnail_url: rows[0].post_thumbnail_url,
+                                        post_like_count: rows[0].post_like_count,
+                                        post_comment_count: rows[0].post_comment_count,
+                                        post_view_count: rows[0].post_view_count,
+                                        post_image_count: rows[0].post_image_count,
+                                        user_nickname: rows[0].user_nickname,
+                                        post_isSecret: rows[0].post_isSecret,
+                                        post_user_isSecret: rows[0].post_user_isSecret,
+                                        post_created: rows[0].post_created,
+                                        post_updated: rows[0].post_updated,
+                                        liked: 'on',
+                                        postOwner:postOwner
+                                    });
+                                } else {
+                                    postMetaData.push({
+                                        post_id: rows[0].post_id,
+                                        editorType: rows[0].editorType,
+                                        post_textOnly: rows[0].post_textOnly,
+                                        shb_num: rows[0].shb_num,
+                                        shb_name:rows[0].shb_name,
+                                        shb_item_id: rows[0].shb_item_id,
+                                        shb_item_name:rows[0].shb_item_name,
+                                        parent_route: rows[0].parent_route,
+                                        post_title: rows[0].post_title,
+                                        post_desc: rows[0].post_desc,
+                                        post_thumbnail_url: rows[0].post_thumbnail_url,
+                                        post_like_count: rows[0].post_like_count,
+                                        post_comment_count: rows[0].post_comment_count,
+                                        post_view_count: rows[0].post_view_count,
+                                        post_image_count: rows[0].post_image_count,
+                                        user_nickname: rows[0].user_nickname,
+                                        post_isSecret: rows[0].post_isSecret,
+                                        post_user_isSecret: rows[0].post_user_isSecret,
+                                        post_created: rows[0].post_created,
+                                        post_updated: rows[0].post_updated,
+                                        liked: 'off',
+                                        postOwner:postOwner
+                                    });
+                                }
+                                return res.json({
+                                    message:'success', 
+                                    postModule:postModule, 
+                                    commonFiles:rows[0].post_materials,
+                                    postMetaData:postMetaData[0]
+                                });
+
+                            }
+                        });
+                    });
+                }
+            });
+    }); // connect post end
+}); //router end
+
+// path: /api/shb/post/writepost/sheditor/v1
+router.post('/writepost/sheditor/v1', async function (req, res) {
+    if (req.body.usid === undefined) {
+        return res.json({ message: 'invalidUser' });
+    }
+
+    const sessID = 'sess:' + cipher.decrypt(req.body.usid);
+    client.exists(sessID, (err, replyExists) => {
+        if (replyExists) {
+            client.get(sessID, async(err, replyGet) => {
+                const resultGet = JSON.parse(replyGet);
+                
+                // 1차 데이터
+                const user_id = resultGet.user.user_id;
+                const shb_num = req.body.BomNo;
+                const shb_item_id = req.body.Category;
+                const parent_route = req.body.Pr;
+                const postTitle = req.body.postTitle;
+                const postData = req.body.postData;
+                const commonFiles = req.body.commonFiles;
+
+                // 2차 가공 데이터  AOP = All Of Post
+                let textOnly_AOP = sheditorHandle.getTextOnly(postData);
+                let imageCount_AOP = sheditorHandle.getImageCount(postData);
+                let thumbnailUrl_AOP = sheditorHandle.getThumbnail(postData);
+                let blockIndexArray = [];
+                let post_materials = null;
+
+                if (commonFiles[0]) {
+                    post_materials = JSON.stringify(commonFiles);
+                }
+
+                // console.log(imageCount_AOP);
+                // const setBlockIndexArray = (block) =>{
+                //     blockIndexArray.push(block.insertId);
+                // }
+
+                // // fill the block db
+                for (let i = 0; i < postData.length; i++) {
+                    // getTextOnly 의 참조변수가 배열형식이므로 데이터를 배열형식으로 집어넣어야 한다.
+                    const moduleData = postData[i];
+                    let textOnly_Blk = sheditorHandle.getTextOnly([moduleData]);
+                    let thumbnailUrl_Blk = null;
+                    let imageCount_Blk = sheditorHandle.getImageCount([moduleData]);
+
+                    if (sheditorHandle.getThumbnail([moduleData]).imgUrl !== 'none') {
+                        thumbnailUrl_Blk = sheditorHandle.getThumbnail([moduleData]);
+                    }
+
+                    console.log('moduleData:',moduleData);
+                    // console.log(`module : ${i}--------------`);
+                    // console.log(textOnly_Blk);
+                    // console.log(thumbnailUrl_Blk);
+                    let sql = `
+                        INSERT INTO post_block(pblock_uuid, pblock_images, pblock_thumbnail,pblock_image_count, pblock_desc, pblock_textOnly,pblock_imageSliderOn)
+                        VALUES (?,?,?,?,?,?,?)
+                    `;
+                    let params = [moduleData.id, JSON.stringify(moduleData.imageList), thumbnailUrl_Blk, imageCount_Blk, moduleData.editorData, textOnly_Blk, moduleData.imageSliderOn];
+
+                    let retBlk = await pool.query(sql, params);
+                    
+                    if (retBlk[0].affectedRows === 1) {
+                        blockIndexArray.push(retBlk[0].insertId);
+                    } else {
+                        return res.json({ message: 'error' });
+                    }
+                }
+
+                let sql = `
+                    INSERT INTO post(editorType, shb_num, shb_item_id, parent_route, post_title, post_desc, post_textOnly, post_materials, post_thumbnail_url, post_image_count, user_id)
+                    VALUES(?,?,?,?,?,?,?,?,?,?,?)
+                `;
+                let params = [
+                    'sheditor',
+                    shb_num,
+                    shb_item_id,
+                    parent_route,
+                    postTitle,
+                    JSON.stringify(blockIndexArray),
+                    textOnly_AOP,
+                    post_materials,
+                    thumbnailUrl_AOP,
+                    imageCount_AOP,
+                    user_id
+                ];
+
+                let retResult = await pool.query(sql, params);
+                if (retResult[0].affectedRows === 1) {
+                    return res.json({ 
+                        message: 'success', 
+                        postInfo:{
+                            postVal: retResult[0].insertId ,
+                            Pr:parent_route,
+                            BomNo:shb_num,
+                            Category:shb_item_id
+                        }
+                        
+                    });
+                } else {
+                    return res.json({ message: 'error' });
+                }
+            })
+        }
+    });
+})
+
+// path: /api/shb/post/updatepost/sheditor/v1
+router.post('/updatepost/sheditor/v1', async function (req, res) {
+    if (req.body.usid === undefined) {
+        return res.json({ message: 'invalidUser' });
+    }
+
+    const sessID = 'sess:' + cipher.decrypt(req.body.usid);
+    client.exists(sessID, (err, replyExists) => {
+        if (replyExists) {
+            client.get(sessID, async(err, replyGet) => {
+                const resultGet = JSON.parse(replyGet);
+                
+                // 1차 데이터
+                const user_id = resultGet.user.user_id;
+                const shb_num = req.body.BomNo;
+                const shb_item_id = req.body.Category;
+                const parent_route = req.body.Pr;
+                const postTitle = req.body.postTitle;
+                const postData = req.body.postData;
+                const commonFiles = req.body.commonFiles;
+                const PostVal = req.body.PostVal;
+                const postMetaData = req.body.postMetaData;
+
+                let sql = `
+                    SELECT * FROM post WHERE post_id=? AND post_isDeleted=0
+                `;
+                let params = [PostVal];
+                connect.query(sql, params, function(err, rows){
+                    if(err){
+                        return res.json({message:'error'})
+                    }
+                    if(rows[0]===undefined || rows===null || rows===undefined){
+                        return res.json({message:'error'})
+                    }
+                })
+
+                // 2차 가공 데이터  AOP = All Of Post
+                let textOnly_AOP = sheditorHandle.getTextOnly(postData);
+                let imageCount_AOP = sheditorHandle.getImageCount(postData);
+                let thumbnailUrl_AOP = sheditorHandle.getThumbnail(postData);
+                let blockIndexArray = [];
+                let post_materials = null;
+
+                if (commonFiles[0]) {
+                    post_materials = JSON.stringify(commonFiles);
+                }
+
+                // // // fill the block db
+                for (let i = 0; i < postData.length; i++) {
+                //     // getTextOnly 의 참조변수가 배열형식이므로 데이터를 배열형식으로 집어넣어야 한다.
+                    const moduleData = postData[i];
+                    let textOnly_Blk = sheditorHandle.getTextOnly([moduleData]);
+                    let thumbnailUrl_Blk = null;
+                    let imageCount_Blk = sheditorHandle.getImageCount([moduleData]);
+
+                    if (sheditorHandle.getThumbnail([moduleData]).imgUrl !== 'none') {
+                        thumbnailUrl_Blk = sheditorHandle.getThumbnail([moduleData]);
+                    }
+                    // console.log(postData[i]);
+                    let checkExistSql = `
+                        SELECT * FROM post_block WHERE pblock_uuid=?
+                    `;
+                    let checkExistParams = [postData[i].id];
+                    let [checkExistBlock,checkExistBlockField] = await pool.query(checkExistSql,checkExistParams);
+                    // console.log(checkExistBlock[0]);
+                    let sql;
+                    let params;
+                    if(checkExistBlock[0]){
+                        sql = `
+                            UPDATE post_block SET pblock_images=?, pblock_thumbnail=?, pblock_image_count=?, pblock_desc=?, pblock_textOnly=?, pblock_imageSliderOn=?
+                            WHERE pblock_id=? AND pblock_uuid=?
+                        `;
+                        params = [JSON.stringify(moduleData.imageList),thumbnailUrl_Blk,imageCount_Blk,moduleData.editorData,textOnly_Blk,moduleData.imageSliderOn,checkExistBlock[0].pblock_id, checkExistBlock[0].pblock_uuid];
+                        let retBlk = await pool.query(sql, params);
+                        blockIndexArray.push(checkExistBlock[0].pblock_id);
+                    }else{
+                        sql = `
+                            INSERT INTO post_block(pblock_uuid, pblock_images, pblock_thumbnail,pblock_image_count, pblock_desc, pblock_textOnly,pblock_imageSliderOn)
+                            VALUES (?,?,?,?,?,?,?)
+                        `;
+                        params = [moduleData.id, JSON.stringify(moduleData.imageList), thumbnailUrl_Blk, imageCount_Blk, moduleData.editorData, textOnly_Blk, moduleData.imageSliderOn];
+                        let retBlk = await pool.query(sql, params);
+                        if (retBlk[0].affectedRows === 1) {
+                            blockIndexArray.push(retBlk[0].insertId);
+                        } else {
+                            res.json({ message: 'error' });
+                        }
+                    }
+                }
+
+                let resultSql = `
+                    UPDATE post SET editorType=?, shb_num=?, shb_item_id=?, parent_route=?, post_title=?, post_desc=?,post_textOnly=?,post_materials=?,post_thumbnail_url=?,post_image_count=?,user_id=?
+                    WHERE post_id=?
+                `;
+                let resultParams = [
+                    'sheditor',
+                    shb_num,
+                    shb_item_id,
+                    parent_route,
+                    postTitle,
+                    JSON.stringify(blockIndexArray),
+                    textOnly_AOP,
+                    post_materials,
+                    thumbnailUrl_AOP,
+                    imageCount_AOP,
+                    user_id,
+                    PostVal
+                ];
+                let retResult = await pool.query(resultSql, resultParams);
+                if (retResult[0].affectedRows === 1) {
+                    return res.json({ 
+                        message: 'success', 
+                        postInfo:{
+                            postVal: PostVal,
+                            Pr:parent_route,
+                            BomNo:shb_num,
+                            Category:shb_item_id
+                        }
+                        
+                    });
+                } else {
+                    return res.json({ message: 'error' });
+                }
+            })
+        }
+    });
+})
+
+
 router.post('/updatePost/category', function (req, res) {
     // console.log(req.body.usid);
     // console.log(req.body.shb_num);
@@ -419,13 +823,13 @@ router.post('/updatePost/category', function (req, res) {
     // console.log(req.body.post_id);
     // console.log(req.body.post_title);
     // console.log(req.body.post_desc);
-    if(req.body.usid===null){   //null or undefined
+    if (req.body.usid === null) {   //null or undefined
         return res.json({ message: 'invalidUser' });
     }
-    const sessID = 'sess:'+cipher.decrypt(req.body.usid);
-    client.exists(sessID,(err,replyExists)=>{
-        if(replyExists){
-            client.get(sessID,(err,replyGet)=>{
+    const sessID = 'sess:' + cipher.decrypt(req.body.usid);
+    client.exists(sessID, (err, replyExists) => {
+        if (replyExists) {
+            client.get(sessID, (err, replyGet) => {
                 const resultGet = JSON.parse(replyGet);
                 const user_id = resultGet.user.user_id;
 
@@ -463,7 +867,7 @@ router.post('/updatePost/category', function (req, res) {
                         // } else {
                         //     res.status(201).json({ message: 'failure' });
                         // }
-                        if(rows.message)
+                        if (rows.message)
                             res.status(201).json({ message: 'success' });
                     }
                 });
@@ -474,77 +878,77 @@ router.post('/updatePost/category', function (req, res) {
 
 // poster 유저 유효성 검사
 
-router.post('/posterValidation/shb', function(req,res){
+router.post('/posterValidation/shb', function (req, res) {
     let sql = `
         SELECT user_id FROM post 
         WHERE post_id=? AND shb_num=?
     `;
     let params = [req.body.post_id, req.body.head_type];
 
-    connect.query(sql, params, function(err, postGet, fileds){
-        
-        if(postGet[0] && req.body.usid){
-            const sessID = 'sess:'+cipher.decrypt(req.body.usid);
+    connect.query(sql, params, function (err, postGet, fileds) {
 
-            client.exists(sessID,(err,replyExists)=>{
-                if(replyExists){
-                    client.get(sessID,(err,replyGet)=>{
+        if (postGet[0] && req.body.usid) {
+            const sessID = 'sess:' + cipher.decrypt(req.body.usid);
+
+            client.exists(sessID, (err, replyExists) => {
+                if (replyExists) {
+                    client.get(sessID, (err, replyGet) => {
                         const resultGet = JSON.parse(replyGet);
                         const user_id = resultGet.user.user_id;
-                        if(user_id===postGet[0].user_id){
+                        if (user_id === postGet[0].user_id) {
                             res.send("valid");
-                        }else{
+                        } else {
                             res.send("invalid");
                         }
                     });
                 }
             });
-            
-        }else{
+
+        } else {
             res.send("error");
         }
-        
+
     });
-    
+
 });
 
-router.post('/deletePoster/shb/one', function(req,res){
+router.post('/deletePoster/shb/one', function (req, res) {
     let sql = `
         SELECT user_id,post_id FROM post 
         WHERE post_id=? AND shb_num=?
     `;
     let params = [req.body.post_id, req.body.head_type];
 
-    connect.query(sql, params, function(err, postGet, fileds){
-        if(postGet[0] && req.body.usid){
-            const sessID = 'sess:'+cipher.decrypt(req.body.usid);
-    
-            client.exists(sessID,(err,replyExists)=>{
-                if(replyExists){
-                    client.get(sessID,(err,replyGet)=>{
+    connect.query(sql, params, function (err, postGet, fileds) {
+        if (postGet[0] && req.body.usid) {
+            const sessID = 'sess:' + cipher.decrypt(req.body.usid);
+
+            client.exists(sessID, (err, replyExists) => {
+                if (replyExists) {
+                    client.get(sessID, (err, replyGet) => {
                         const resultGet = JSON.parse(replyGet);
                         const user_id = resultGet.user.user_id;
-                        if(user_id===postGet[0].user_id){
+                        if (user_id === postGet[0].user_id) {
                             let sql = `
                                 UPDATE post SET post_isDeleted=1
                                 WHERE post_id=?
                             `;
                             let params = [postGet[0].post_id];
 
-                            connect.query(sql, params, function(err, rows, fields){
+                            connect.query(sql, params, function (err, rows, fields) {
                                 res.send('success');
                             });
-                        }else{
+                        } else {
                             res.send('error');
                         }
                     });
-                }else{
+                } else {
                     res.send('error');
                 }
             });
         }
     });
-    
+
 });
 
 router.post('/postCount/plus', function (req, res) {

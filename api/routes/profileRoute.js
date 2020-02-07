@@ -429,6 +429,7 @@ router.get('/mypostlist/shb',function(req,res){
                                 let rowitem = {
                                     message:'success',
                                     post_id:rows[i].post_id,
+                                    editorType:rows[i].editorType,
                                     parent_route:rows[i].parent_route,
                                     shb_num:rows[i].shb_num,
                                     shb_item_id:rows[i].shb_item_id,
