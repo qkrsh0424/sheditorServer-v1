@@ -205,6 +205,8 @@ router.get('/getpost/shbNum/all', function (req, res) {
                 if (rows[i]) {
                     result.push({
                         post_id: rows[i].post_id,
+                        editorType: rows[i].editorType,
+                        post_textOnly: rows[i].post_textOnly,
                         shb_num: rows[i].shb_num,
                         shb_item_id: rows[i].shb_item_id,
                         parent_route: rows[i].parent_route,
@@ -244,6 +246,8 @@ router.get('/getpost/shbNum/all', function (req, res) {
                 if (rows[i]) {
                     result.push({
                         post_id: rows[i].post_id,
+                        editorType: rows[i].editorType,
+                        post_textOnly: rows[i].post_textOnly,
                         shb_num: rows[i].shb_num,
                         shb_item_id: rows[i].shb_item_id,
                         parent_route: rows[i].parent_route,
