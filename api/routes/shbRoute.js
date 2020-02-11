@@ -145,6 +145,34 @@ router.get('/getshbItemAll', function(req,res){
     });
 });
 
+// /api/shb/getshbItemAll/havePostCount
+router.get('/getshbItemAll/havePostCount', function(req,res){
+    // console.log('hi');
+    const shb_num = req.query.shb_num;
+    let sql = `
+        
+        SELECT a.*, (SELECT count(*) FROM post WHERE post.shb_item_id=a.shb_item_id) as NOP
+        FROM shb_item as a
+        WHERE a.shb_item_isDeleted=0 AND a.shb_num=? AND a.shb_item_visible=1
+        ORDER BY ISNULL(a.shb_item_order) ASC, a.shb_item_order ASC, a.shb_item_name ASC
+    `;
+    let params = [shb_num];
+
+    connect.query(sql, params, function(err, rows, fields){
+        if(err){
+            console.log(err)
+            res.json({message:'DBerror'});
+        }else{
+            if(rows[0]){
+                res.json({message:'success', data:rows});
+            }else{
+                res.json({message:'failure'});
+            }
+            
+        }
+    });
+});
+
 router.get('/shbItem/getOne', function(req,res){
     let sql = `
         SELECT shb_item.*, shb.shb_name FROM shb_item

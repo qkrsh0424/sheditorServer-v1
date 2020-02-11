@@ -630,7 +630,7 @@ router.post('/writepost/sheditor/v1', async function (req, res) {
                         thumbnailUrl_Blk = sheditorHandle.getThumbnail([moduleData]);
                     }
 
-                    console.log('moduleData:',moduleData);
+                    // console.log('moduleData:',moduleData);
                     // console.log(`module : ${i}--------------`);
                     // console.log(textOnly_Blk);
                     // console.log(thumbnailUrl_Blk);
