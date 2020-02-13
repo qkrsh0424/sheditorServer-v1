@@ -23,6 +23,7 @@ router.use(function (req, res, next) { //1
 });
 
 router.get('/getpost/all', function (req, res) {
+
     // console.log(req.query.numIndex);
     let getLimit = Number(req.query.numIndex);
     // console.log(getLimit);
@@ -966,4 +967,40 @@ router.post('/postCount/plus', function (req, res) {
     })
 });
 
+//test
+// path: /api/shb/post/papagotest
+router.post('/papagotest',function(req,res){
+    var request = require('request');
+    var sourceText = req.body.sourceText;
+    var sourceLanguage = req.body.sourceLanguage;
+    var targetLanguage = req.body.targetLanguage;
+    var options = {
+    'method': 'POST',
+    'url': 'https://openapi.naver.com/v1/papago/n2mt',
+    'headers': {
+        'X-Naver-Client-Id': 'TwvJBc99_86PvskJNirw',
+        'X-Naver-Client-Secret': 'dQK2aht33r',
+        'User-Agent': 'curl/7.49.1',
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Accept': '*/*',
+        'Host': 'openapi.naver.com'
+    },
+    form: {
+        'source': sourceLanguage,
+        'target': targetLanguage,
+        'text': sourceText
+    }
+    };
+    request(options, function (error, response) { 
+    if (error) throw new Error(error);
+        // console.log(response.body)
+        // console.log(JSON.parse(response.body).errorCode)
+        var parsingData = JSON.parse(response.body);
+        if(parsingData.errorCode==='N2MT07'){
+            return res.json({message:'non-sourceText'})
+        }
+        res.json({message:'success',ret:parsingData});
+    });
+
+})
 module.exports = router;

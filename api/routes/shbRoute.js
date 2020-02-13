@@ -151,7 +151,7 @@ router.get('/getshbItemAll/havePostCount', function(req,res){
     const shb_num = req.query.shb_num;
     let sql = `
         
-        SELECT a.*, (SELECT count(*) FROM post WHERE post.shb_item_id=a.shb_item_id) as NOP
+        SELECT a.*, (SELECT count(*) FROM post WHERE post.shb_item_id=a.shb_item_id AND post.post_isDeleted=0) as NOP
         FROM shb_item as a
         WHERE a.shb_item_isDeleted=0 AND a.shb_num=? AND a.shb_item_visible=1
         ORDER BY ISNULL(a.shb_item_order) ASC, a.shb_item_order ASC, a.shb_item_name ASC

@@ -64,6 +64,7 @@ const profileRoute = require(__dirname+'/api/routes/profileRoute');
 
 //Service
 const feedbackRoute = require(__dirname+'/api/routes/feedbackRoute');
+const extendServiceRoute = require(__dirname+'/api/routes/extendServiceRoute');
 
 //Utill
 const mainSearchRoute = require(__dirname+'/api/routes/mainSearchRoute');
@@ -102,6 +103,7 @@ app.use('/api/auth/profile',profileRoute);
 
 //Service
 app.use('/api/service/feedback', feedbackRoute);
+app.use('/api/service/extend', extendServiceRoute);
 
 //Util
 app.use('/api/utill/mainSearch', mainSearchRoute);
