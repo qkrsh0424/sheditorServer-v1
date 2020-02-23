@@ -68,6 +68,7 @@ const extendServiceRoute = require(__dirname+'/api/routes/extendServiceRoute');
 
 //Utill
 const mainSearchRoute = require(__dirname+'/api/routes/mainSearchRoute');
+const notificationRoute = require(__dirname+'/api/routes/notificationRoute');
 
 //admin and member
 const adminRoute = require(__dirname+'/api/routes/adminRoute');
@@ -107,6 +108,7 @@ app.use('/api/service/extend', extendServiceRoute);
 
 //Util
 app.use('/api/utill/mainSearch', mainSearchRoute);
+app.use('/api/utill/notification', notificationRoute);
 
 //admin and member
 app.use('/api/auth/admin/',adminRoute);

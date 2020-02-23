@@ -338,7 +338,7 @@ router.post('/post_comment/write', function(req,res){
                                 `;
                                 let params = [commentCount[0].count,req.body.post_id];
                                 connect.query(sql, params, function(err, resultrows, fields){
-                                    res.json({message:'success'});
+                                    res.json({message:'success',commentId:rows.insertId}); 
                                 });
                             });
                             
