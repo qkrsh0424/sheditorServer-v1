@@ -967,6 +967,58 @@ router.post('/postCount/plus', function (req, res) {
     })
 });
 
+// path: /api/shb/post/getpost/recomend
+router.get('/getpost/recomend', function (req, res) {
+
+    // console.log(req.query.numIndex);
+    let getLimit = Number(req.query.numIndex);
+    // console.log(getLimit);
+    let sql = `
+        SELECT * FROM post 
+        JOIN user ON post.user_id=user.user_id
+        JOIN shb ON post.shb_num=shb.shb_num
+        JOIN shb_item ON post.shb_item_id=shb_item.shb_item_id
+        WHERE post_isDeleted=0 AND shb_item.shb_item_visible=1
+        ORDER BY post_like_count DESC, post_view_count DESC
+        LIMIT ?
+    `;
+
+    let params = [getLimit];
+    connect.query(sql, params, function (err, rows, fields) {
+        let result = [];
+        if (rows[0]) {
+            for (let i = 0; i < rows.length; i++) {
+                let data = {
+                    post_id: rows[i].post_id,
+                    editorType:rows[i].editorType,
+                    shb_num: rows[i].shb_num,
+                    shb_name: rows[i].shb_name,
+                    shb_item_id: rows[i].shb_item_id,
+                    shb_item_name: rows[i].shb_item_name,
+                    parent_route: rows[i].parent_route,
+                    post_title: rows[i].post_title,
+                    post_desc: rows[i].post_title,
+                    post_thumbnail_url: rows[i].post_thumbnail_url,
+                    post_like_count: rows[i].post_like_count,
+                    post_comment_count: rows[i].post_comment_count,
+                    post_view_count: rows[i].post_view_count,
+                    post_image_count: rows[i].post_image_count,
+                    post_created: rows[i].post_created,
+                    post_updated: rows[i].post_updated,
+                    user_nickname: rows[i].user_nickname,
+                    post_isSecret: rows[i].post_isSecret,
+                    post_user_isSecret: rows[i].post_user_isSecret,
+                }
+                result.push(data);
+            }
+            res.json({ message: 'success', data: result });
+        } else {
+            res.json({ message: 'none' });
+        }
+
+    });
+});
+
 //test
 // path: /api/shb/post/papagotest
 router.post('/papagotest',function(req,res){
@@ -1001,6 +1053,5 @@ router.post('/papagotest',function(req,res){
         }
         res.json({message:'success',ret:parsingData});
     });
-
 })
 module.exports = router;
