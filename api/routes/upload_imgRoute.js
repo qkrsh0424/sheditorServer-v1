@@ -94,9 +94,9 @@ router.post('/draft-oss', async(req,res)=>{
         let resultDataUrlAll = [];
         for(let i=0; i<req.files.file.length;i++){
             let fileName = ossDirectory+Date.now()+'-'+String(i)+'-'+req.files.file[i].name;
-            await client.put(fileName, req.files.file[i].data);
-            let resultData = await client.get(fileName);
-            resultDataUrlAll.push(resultData.res.requestUrls[0]);
+            let resPutter = await client.put(fileName, req.files.file[i].data);
+            // let resultData = await client.get(fileName);
+            resultDataUrlAll.push(resPutter.res.requestUrls[0]);
         }
         if(resultDataUrlAll.length===req.files.file.length){
             let result = {
@@ -113,13 +113,13 @@ router.post('/draft-oss', async(req,res)=>{
         }
     }else{
         let fileName = ossDirectory+Date.now()+req.files.file.name; 
-        await client.put(fileName, req.files.file.data);
-        let resultData = await client.get(fileName);
-        if(resultData){
+        let resPutter = await client.put(fileName, req.files.file.data);
+        // let resultData = await client.get(fileName);
+        if(resPutter.res.status===200){
             let result ={
                 message:'successOne',
                 // url:"https://ddpf5wamlzit3.cloudfront.net/posterImg/" + req.file.key
-                url: resultData.res.requestUrls[0]
+                url: resPutter.res.requestUrls[0]
             }
             res.json(result);
         }else{
@@ -131,6 +131,54 @@ router.post('/draft-oss', async(req,res)=>{
     }
 });
 
+// /api/uploadimg/draft-oss/video/upload
+router.post('/draft-oss/video/upload', async(req,res)=>{
+    let ossDirectory = 'videoFiles/';
+    // console.log(req.files.commonfile.name);
+    if(req.files){
+        // console.log(req.files.file);
+        let resultDataUrlAll = [];
+        let fileName = ossDirectory+Date.now()+req.files.file.name;
+        await client.put(fileName, req.files.file.data).then(resultPut=>{
+            // console.log(resultPut);
+            if(resultPut.res.status===200){
+                // console.log(resultPut.res.requestUrls[0]);
+                return res.json({message:'success',fileName,url:resultPut.res.requestUrls[0],type:req.files.file.mimetype});
+            }else{
+                console.log('err');
+                return res.json({message:'failure'})
+            }
+        });
+    }else{
+        return res.json({message:'maybeEmpty'})
+    }
+    
+})
+
+// /api/uploadimg/draft-oss/videothumbnail/upload
+router.post('/draft-oss/videothumbnail/upload', async(req,res)=>{
+    let ossDirectory = 'videoFiles/';
+    // console.log(req.files.commonfile.name);
+    if(req.files){
+        // console.log(req.files.file);
+        let resultDataUrlAll = [];
+        let fileName = ossDirectory+Date.now()+req.files.file.name;
+        await client.put(fileName, req.files.file.data).then(resultPut=>{
+            // console.log(resultPut);
+            if(resultPut.res.status===200){
+                // console.log(resultPut.res.requestUrls[0]);
+                return res.json({message:'success',fileName,url:resultPut.res.requestUrls[0],type:req.files.file.mimetype});
+            }else{
+                console.log('err');
+                return res.json({message:'failure'})
+            }
+        });
+    }else{
+        return res.json({message:'maybeEmpty'})
+    }
+    
+})
+
 router.post('/draft-oss/file/upload', async(req,res)=>{
     let ossDirectory = 'commonFiles/';
     // console.log(req.files.commonfile.name);
@@ -139,9 +187,10 @@ router.post('/draft-oss/file/upload', async(req,res)=>{
             let resultDataUrlAll = [];
             for(let i=0; i<req.files.commonfile.length;i++){
                 let fileName = ossDirectory+Date.now()+'-'+String(i)+'-'+req.files.commonfile[i].name;
-                await client.put(fileName, req.files.commonfile[i].data);
-                let resultData = await client.get(fileName);
-                resultDataUrlAll.push({name:req.files.commonfile[i].name,url:resultData.res.requestUrls[0]});
+                let resPutter = await client.put(fileName, req.files.commonfile[i].data);
+                // console.log(clientPutter);
+                // let resultData = await client.get(fileName);
+                resultDataUrlAll.push({name:req.files.commonfile[i].name,url:resPutter.res.requestUrls[0]});
             }
             // console.log(resultDataUrlAll);
             if(resultDataUrlAll.length===req.files.commonfile.length){
@@ -160,14 +209,16 @@ router.post('/draft-oss/file/upload', async(req,res)=>{
             }
         }else{
             let fileName = ossDirectory+Date.now()+req.files.commonfile.name; 
-            await client.put(fileName, req.files.commonfile.data);
-            let resultData = await client.get(fileName);
-            if(resultData){
+            let resPutter = await client.put(fileName, req.files.commonfile.data);
+            // console.log(clientPutter.res.requestUrls[0]);
+            // let resultData = await client.get(fileName);
+
+            if(resPutter.res.status===200){
                 let result ={
                     message:'successOne',
                     // url:"https://ddpf5wamlzit3.cloudfront.net/posterImg/" + req.file.key
-                    file:{name:req.files.commonfile.name, url:resultData.res.requestUrls[0]},
-                    url: resultData.res.requestUrls[0]
+                    file:{name:req.files.commonfile.name, url:resPutter.res.requestUrls[0]},
+                    url: resPutter.res.requestUrls[0]
                 }
                 return res.json(result);
             }else{

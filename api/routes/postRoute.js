@@ -57,6 +57,7 @@ router.get('/getpost/all', function (req, res) {
                     post_comment_count: rows[i].post_comment_count,
                     post_view_count: rows[i].post_view_count,
                     post_image_count: rows[i].post_image_count,
+                    post_video_count: rows[i].post_video_count,
                     post_created: rows[i].post_created,
                     post_updated: rows[i].post_updated,
                     user_nickname: rows[i].user_nickname,
@@ -99,6 +100,7 @@ router.get('/getpost/one', function (req, res) {
                     post_comment_count: rowsPost[0].post_comment_count,
                     post_view_count: rowsPost[0].post_view_count,
                     post_image_count: rowsPost[0].post_image_count,
+                    post_video_count: rowsPost[0].post_video_count,
                     user_nickname: rowsPost[0].user_nickname,
                     post_isSecret: rowsPost[0].post_isSecret,
                     post_user_isSecret: rowsPost[0].post_user_isSecret,
@@ -142,6 +144,7 @@ router.get('/getpost/one', function (req, res) {
                                         post_comment_count: rowsPost[0].post_comment_count,
                                         post_view_count: rowsPost[0].post_view_count,
                                         post_image_count: rowsPost[0].post_image_count,
+                                        post_video_count: rowsPost[0].post_video_count,
                                         user_nickname: rowsPost[0].user_nickname,
                                         post_isSecret: rowsPost[0].post_isSecret,
                                         post_user_isSecret: rowsPost[0].post_user_isSecret,
@@ -165,6 +168,7 @@ router.get('/getpost/one', function (req, res) {
                                         post_comment_count: rowsPost[0].post_comment_count,
                                         post_view_count: rowsPost[0].post_view_count,
                                         post_image_count: rowsPost[0].post_image_count,
+                                        post_video_count: rowsPost[0].post_video_count,
                                         user_nickname: rowsPost[0].user_nickname,
                                         post_isSecret: rowsPost[0].post_isSecret,
                                         post_user_isSecret: rowsPost[0].post_user_isSecret,
@@ -218,6 +222,7 @@ router.get('/getpost/shbNum/all', function (req, res) {
                         post_comment_count: rows[i].post_comment_count,
                         post_view_count: rows[i].post_view_count,
                         post_image_count: rows[i].post_image_count,
+                        post_video_count: rows[i].post_video_count,
                         user_nickname: rows[i].user_nickname,
                         post_isSecret: rows[i].post_isSecret,
                         post_user_isSecret: rows[i].post_user_isSecret,
@@ -259,6 +264,7 @@ router.get('/getpost/shbNum/all', function (req, res) {
                         post_comment_count: rows[i].post_comment_count,
                         post_view_count: rows[i].post_view_count,
                         post_image_count: rows[i].post_image_count,
+                        post_video_count: rows[i].post_video_count,
                         user_nickname: rows[i].user_nickname,
                         post_isSecret: rows[i].post_isSecret,
                         post_user_isSecret: rows[i].post_user_isSecret,
@@ -307,6 +313,7 @@ router.get('/getpost/category/all', function (req, res) {
                         post_comment_count: rows[i].post_comment_count,
                         post_view_count: rows[i].post_view_count,
                         post_image_count: rows[i].post_image_count,
+                        post_video_count: rows[i].post_video_count,
                         user_nickname: rows[i].user_nickname,
                         post_isSecret: rows[i].post_isSecret,
                         post_user_isSecret: rows[i].post_user_isSecret,
@@ -353,6 +360,7 @@ router.get('/getpost/category/all', function (req, res) {
                                     post_comment_count: rows[i].post_comment_count,
                                     post_view_count: rows[i].post_view_count,
                                     post_image_count: rows[i].post_image_count,
+                                    post_video_count: rows[i].post_video_count,
                                     user_nickname: rows[i].user_nickname,
                                     post_isSecret: rows[i].post_isSecret,
                                     post_user_isSecret: rows[i].post_user_isSecret,
@@ -455,7 +463,8 @@ router.get('/getpost/sheditor/one', async function(req,res){
                 id:getBlk[0].pblock_uuid,
                 imageList:JSON.parse(getBlk[0].pblock_images),
                 editorData:getBlk[0].pblock_desc,
-                imageSliderOn:Boolean(getBlk[0].pblock_imageSliderOn)
+                imageSliderOn:Boolean(getBlk[0].pblock_imageSliderOn),
+                videoData:getBlk[0].pblock_videoData?JSON.parse(getBlk[0].pblock_videoData):null
             }
             postModule.push(setModule);
         }
@@ -480,6 +489,7 @@ router.get('/getpost/sheditor/one', async function(req,res){
                 post_comment_count: rows[0].post_comment_count,
                 post_view_count: rows[0].post_view_count,
                 post_image_count: rows[0].post_image_count,
+                post_video_count: rows[0].post_video_count,
                 user_nickname: rows[0].user_nickname,
                 post_isSecret: rows[0].post_isSecret,
                 post_user_isSecret: rows[0].post_user_isSecret,
@@ -537,6 +547,7 @@ router.get('/getpost/sheditor/one', async function(req,res){
                                         post_comment_count: rows[0].post_comment_count,
                                         post_view_count: rows[0].post_view_count,
                                         post_image_count: rows[0].post_image_count,
+                                        post_video_count: rows[0].post_video_count,
                                         user_nickname: rows[0].user_nickname,
                                         post_isSecret: rows[0].post_isSecret,
                                         post_user_isSecret: rows[0].post_user_isSecret,
@@ -562,6 +573,7 @@ router.get('/getpost/sheditor/one', async function(req,res){
                                         post_comment_count: rows[0].post_comment_count,
                                         post_view_count: rows[0].post_view_count,
                                         post_image_count: rows[0].post_image_count,
+                                        post_video_count: rows[0].post_video_count,
                                         user_nickname: rows[0].user_nickname,
                                         post_isSecret: rows[0].post_isSecret,
                                         post_user_isSecret: rows[0].post_user_isSecret,
@@ -611,6 +623,7 @@ router.post('/writepost/sheditor/v1', async function (req, res) {
                 let textOnly_AOP = sheditorHandle.getTextOnly(postData);
                 let imageCount_AOP = sheditorHandle.getImageCount(postData);
                 let thumbnailUrl_AOP = sheditorHandle.getThumbnail(postData);
+                let videoCount_AOP = sheditorHandle.getVideoCount(postData);
                 let blockIndexArray = [];
                 let post_materials = null;
 
@@ -640,10 +653,19 @@ router.post('/writepost/sheditor/v1', async function (req, res) {
                     // console.log(textOnly_Blk);
                     // console.log(thumbnailUrl_Blk);
                     let sql = `
-                        INSERT INTO post_block(pblock_uuid, pblock_images, pblock_thumbnail,pblock_image_count, pblock_desc, pblock_textOnly,pblock_imageSliderOn)
-                        VALUES (?,?,?,?,?,?,?)
+                        INSERT INTO post_block(pblock_uuid, pblock_images, pblock_thumbnail,pblock_image_count, pblock_desc, pblock_textOnly,pblock_imageSliderOn, pblock_videoData)
+                        VALUES (?,?,?,?,?,?,?,?)
                     `;
-                    let params = [moduleData.id, JSON.stringify(moduleData.imageList), thumbnailUrl_Blk, imageCount_Blk, moduleData.editorData, textOnly_Blk, moduleData.imageSliderOn];
+                    let params = [
+                        moduleData.id, 
+                        JSON.stringify(moduleData.imageList), 
+                        thumbnailUrl_Blk, 
+                        imageCount_Blk, 
+                        moduleData.editorData, 
+                        textOnly_Blk, 
+                        moduleData.imageSliderOn,
+                        moduleData.videoData===null?null:JSON.stringify(moduleData.videoData)
+                    ];
 
                     let retBlk = await pool.query(sql, params);
                     
@@ -655,8 +677,8 @@ router.post('/writepost/sheditor/v1', async function (req, res) {
                 }
 
                 let sql = `
-                    INSERT INTO post(editorType, shb_num, shb_item_id, parent_route, post_title, post_desc, post_textOnly, post_materials, post_thumbnail_url, post_image_count, user_id)
-                    VALUES(?,?,?,?,?,?,?,?,?,?,?)
+                    INSERT INTO post(editorType, shb_num, shb_item_id, parent_route, post_title, post_desc, post_textOnly, post_materials, post_thumbnail_url, post_image_count, post_video_count, user_id)
+                    VALUES(?,?,?,?,?,?,?,?,?,?,?,?)
                 `;
                 let params = [
                     'sheditor',
@@ -669,6 +691,7 @@ router.post('/writepost/sheditor/v1', async function (req, res) {
                     post_materials,
                     thumbnailUrl_AOP,
                     imageCount_AOP,
+                    videoCount_AOP,
                     user_id
                 ];
 
@@ -731,6 +754,7 @@ router.post('/updatepost/sheditor/v1', async function (req, res) {
                 // 2차 가공 데이터  AOP = All Of Post
                 let textOnly_AOP = sheditorHandle.getTextOnly(postData);
                 let imageCount_AOP = sheditorHandle.getImageCount(postData);
+                let videoCount_AOP = sheditorHandle.getVideoCount(postData);
                 let thumbnailUrl_AOP = sheditorHandle.getThumbnail(postData);
                 let blockIndexArray = [];
                 let post_materials = null;
@@ -761,18 +785,37 @@ router.post('/updatepost/sheditor/v1', async function (req, res) {
                     let params;
                     if(checkExistBlock[0]){
                         sql = `
-                            UPDATE post_block SET pblock_images=?, pblock_thumbnail=?, pblock_image_count=?, pblock_desc=?, pblock_textOnly=?, pblock_imageSliderOn=?
+                            UPDATE post_block SET pblock_images=?, pblock_thumbnail=?, pblock_image_count=?, pblock_desc=?, pblock_textOnly=?, pblock_imageSliderOn=?, pblock_videoData=?
                             WHERE pblock_id=? AND pblock_uuid=?
                         `;
-                        params = [JSON.stringify(moduleData.imageList),thumbnailUrl_Blk,imageCount_Blk,moduleData.editorData,textOnly_Blk,moduleData.imageSliderOn,checkExistBlock[0].pblock_id, checkExistBlock[0].pblock_uuid];
+                        params = [
+                            JSON.stringify(moduleData.imageList),
+                            thumbnailUrl_Blk,
+                            imageCount_Blk,
+                            moduleData.editorData,
+                            textOnly_Blk,
+                            moduleData.imageSliderOn,
+                            moduleData.videoData===null?null:JSON.stringify(moduleData.videoData),
+                            checkExistBlock[0].pblock_id, 
+                            checkExistBlock[0].pblock_uuid
+                        ];
                         let retBlk = await pool.query(sql, params);
                         blockIndexArray.push(checkExistBlock[0].pblock_id);
                     }else{
                         sql = `
-                            INSERT INTO post_block(pblock_uuid, pblock_images, pblock_thumbnail,pblock_image_count, pblock_desc, pblock_textOnly,pblock_imageSliderOn)
-                            VALUES (?,?,?,?,?,?,?)
+                            INSERT INTO post_block(pblock_uuid, pblock_images, pblock_thumbnail,pblock_image_count, pblock_desc, pblock_textOnly,pblock_imageSliderOn,pblock_videoData)
+                            VALUES (?,?,?,?,?,?,?,?)
                         `;
-                        params = [moduleData.id, JSON.stringify(moduleData.imageList), thumbnailUrl_Blk, imageCount_Blk, moduleData.editorData, textOnly_Blk, moduleData.imageSliderOn];
+                        params = [
+                            moduleData.id, 
+                            JSON.stringify(moduleData.imageList), 
+                            thumbnailUrl_Blk, 
+                            imageCount_Blk, 
+                            moduleData.editorData, 
+                            textOnly_Blk, 
+                            moduleData.imageSliderOn,
+                            moduleData.videoData===null?null:JSON.stringify(moduleData.videoData)
+                        ];
                         let retBlk = await pool.query(sql, params);
                         if (retBlk[0].affectedRows === 1) {
                             blockIndexArray.push(retBlk[0].insertId);
@@ -783,7 +826,7 @@ router.post('/updatepost/sheditor/v1', async function (req, res) {
                 }
 
                 let resultSql = `
-                    UPDATE post SET editorType=?, shb_num=?, shb_item_id=?, parent_route=?, post_title=?, post_desc=?,post_textOnly=?,post_materials=?,post_thumbnail_url=?,post_image_count=?,user_id=?
+                    UPDATE post SET editorType=?, shb_num=?, shb_item_id=?, parent_route=?, post_title=?, post_desc=?,post_textOnly=?,post_materials=?,post_thumbnail_url=?,post_image_count=?, post_video_count=?, user_id=?
                     WHERE post_id=?
                 `;
                 let resultParams = [
@@ -797,6 +840,7 @@ router.post('/updatepost/sheditor/v1', async function (req, res) {
                     post_materials,
                     thumbnailUrl_AOP,
                     imageCount_AOP,
+                    videoCount_AOP,
                     user_id,
                     PostVal
                 ];
@@ -1003,6 +1047,7 @@ router.get('/getpost/recomend', function (req, res) {
                     post_comment_count: rows[i].post_comment_count,
                     post_view_count: rows[i].post_view_count,
                     post_image_count: rows[i].post_image_count,
+                    post_video_count: rows[i].post_video_count,
                     post_created: rows[i].post_created,
                     post_updated: rows[i].post_updated,
                     user_nickname: rows[i].user_nickname,
